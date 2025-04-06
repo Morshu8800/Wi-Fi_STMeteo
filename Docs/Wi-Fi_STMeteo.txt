@@ -1,0 +1,82 @@
+Configuration	Wi-Fi_STMeteo
+STM32CubeMX 	6.14.0
+Date	04/04/2025
+MCU	STM32G031F8Px
+
+
+
+PERIPHERALS	MODES	FUNCTIONS	PINS
+I2C1	I2C	I2C1_SCL	PB8
+I2C1	I2C	I2C1_SDA	PB9
+I2C2	I2C	I2C2_SCL	PA11 [PA9]
+I2C2	I2C	I2C2_SDA	PA12 [PA10]
+SYS	Serial Wire	SYS_SWCLK	PA14-BOOT0
+SYS	Serial Wire	SYS_SWDIO	PA13
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+1	PB8	I2C1_SCL	
+2	PB9	I2C1_SDA	
+7	PA0	GPIO_Input	WAKE_OK
+11	PA4	GPIO_Input	ESP_Check
+12	PA5	GPIO_Output	ESP_RST
+13	PA6	GPIO_Output	STM_Check
+14	PA7	GPIO_Input	DOWN
+15	PB0	GPIO_Input	UP
+16	PA11 [PA9]	I2C2_SCL	
+17	PA12 [PA10]	I2C2_SDA	
+18	PA13	SYS_SWDIO	
+19	PA14-BOOT0	SYS_SWCLK	
+PERIPHERALS	MODES	FUNCTIONS	PINS
+I2C1	I2C	I2C1_SCL	PB8
+I2C1	I2C	I2C1_SDA	PB9
+I2C2	I2C	I2C2_SCL	PA11 [PA9]
+I2C2	I2C	I2C2_SDA	PA12 [PA10]
+SYS	Serial Wire	SYS_SWCLK	PA14-BOOT0
+SYS	Serial Wire	SYS_SWDIO	PA13
+SYS	SysTick	SYS_VS_Systick	VP_SYS_VS_Systick
+
+
+
+Pin Nb	PINs	FUNCTIONs	LABELs
+1	PB8	I2C1_SCL	
+2	PB9	I2C1_SDA	
+7	PA0	GPIO_Input	WAKE_OK
+11	PA4	GPIO_Input	ESP_Check
+12	PA5	GPIO_Output	ESP_RST
+13	PA6	GPIO_Output	STM_Check
+14	PA7	GPIO_Input	DOWN
+15	PB0	GPIO_Input	UP
+16	PA11 [PA9]	I2C2_SCL	
+17	PA12 [PA10]	I2C2_SDA	
+18	PA13	SYS_SWDIO	
+19	PA14-BOOT0	SYS_SWCLK	
+
+
+
+SOFTWARE PROJECT
+
+Project Settings : 
+Project Name : Wi-Fi_STMeteo
+Project Folder : D:\STM32Proj\Wi-Fi_STMeteo
+Toolchain / IDE : STM32CubeIDE
+Firmware Package Name and Version : STM32Cube FW_G0 V1.6.2
+
+
+Code Generation Settings : 
+STM32Cube MCU packages and embedded software packs : Copy only the necessary library files
+Generate peripheral initialization as a pair of '.c/.h' files per peripheral : No
+Backup previously generated files when re-generating : No
+Delete previously generated files when not re-generated : Yes
+Set all free pins as analog (to optimize the power consumption) : No
+
+
+Toolchains Settings : 
+Compiler Optimizations : 
+
+
+
+
+
