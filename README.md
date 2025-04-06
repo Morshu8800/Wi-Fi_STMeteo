@@ -22,4 +22,5 @@ Wi-Fi STMeteo версия 1.0
 ВНИМАНИЕ! Устройство имеет вентялиционные отверстия и не имеет защиты от влаги и пыли
 # Пример готового проекта
 ![Sample by Morshu8800 ](https://github.com/Morshu8800/Wi-Fi_STMeteo/blob/main/Docs/Sample.jpg)
+
 ! Дизайн проекта может изменяться !
