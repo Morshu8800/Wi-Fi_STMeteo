@@ -3,6 +3,7 @@
  ******************************************************************************
  * @file           : main.c
  * @brief          : Main program body
+ * @author		   : Morshu8800
  ******************************************************************************
  * @attention
  *
@@ -78,14 +79,15 @@ bool clear_flag = false, time_settings = false, hour_set = false, minute_set =
 false, day_set = false, month_set = false, year_set = false, dow_set =
 false, time_set = false, date_set = false, get_time = false;
 
-bool led_flag = false, uart_flag = true, about = false;
+bool led_flag = false, uart_flag = true, about = false, misc = false, wifi_on =
+true;
 
 char GET_COMAND[120] = { 0, }, DEB[120] = { 0, }, MES[120] = { 0, };
 char *WEEK[7] = { "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY",
 		"SATURDAY", "SUNDAY" };
-char *WEK[7] = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
+char *WEK[7] = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
 int_fast8_t menu_page = 0, main_page = 0, menu_pos = 0, time_pos = 0, date_pos =
-		0, settings_pos = 0, about_pos = 0;
+		0, settings_pos = 0, about_pos = 0, misc_pos = 0;
 uint32_t change_page_time = 0, Sleep_time = 0, button_time = 0, mes_time = 0,
 		backl_time = 0, led_con_time = 0, led_connected_time = 0,
 		close_men_time = 0, button_settings_time = 0, display_time = 0;
@@ -124,6 +126,8 @@ void Display_Settings(void);
 void Settings_Controls(void);
 void Display_About(void);
 void About_controls(void);
+void Display_Misc(void);
+void Misc_controls(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -154,7 +158,7 @@ void Startup(void) {
 	LCD_Clear();
 	BMP280_Init(&hi2c2, BMP280_TEMPERATURE_16BIT, BMP280_HIGHRES,
 	BMP280_FORCEDMODE);
-	BMP280_SetConfig( BMP280_STANDBY_MS_20, BMP280_FILTER_X4);
+	BMP280_SetConfig( BMP280_STANDBY_MS_125, BMP280_FILTER_X2);
 	if (!sht3x_init(&handle)) {
 		for (uint8_t i = 0; i < 5; i++) {
 			if (sht3x_init(&handle))
@@ -169,7 +173,8 @@ void Startup(void) {
 				NVIC_SystemReset();
 		}
 	}
-	GPIOA->BSRR = GPIO_BSRR_BS5; //HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, 1);
+	if (wifi_on)
+		GPIOA->BSRR = GPIO_BSRR_BS5; //HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, 1);
 	GPIOA->BSRR = GPIO_BSRR_BS6; //HAL_GPIO_WritePin(stm_check_GPIO_Port, stm_check_Pin, 1);
 	//Load_Con_seg();
 	Load_Clock_seg();
@@ -428,8 +433,8 @@ void Check_Con(void) {
 	 LCD_SetCursor(8, 0);
 	 LCD_PrintString(" ");
 	 }*/
-	if (insettings && !con_rest
-			&& !sleep && !connected /*&& !change_dot && main_page == 0 && !menu*/) {
+	if (insettings && !con_rest && !sleep
+			&& !connected /*&& !change_dot && main_page == 0 && !menu*/) {
 		/*LCD_SetCursor(8, 0);
 		 LCD_PrintMyChar(1);
 		 LCD_SetCursor(7, 1);
@@ -485,7 +490,8 @@ void Check_Con(void) {
 	 LCD_PrintString(" ");
 	 //connected = false;
 	 }*/
-	if (con_rest && !sleep && !connected /*&& !change_dot && main_page == 0 && !menu*/) {
+	if (con_rest && !sleep
+			&& !connected /*&& !change_dot && main_page == 0 && !menu*/) {
 		CMSIS_TIM2_CH2_PWM_Start();
 		//LED_ON
 		//GPIOA->BSRR = GPIO_BSRR_BS1;
@@ -620,88 +626,7 @@ void Print_Meteo(void) {
 	}
 
 }
-
-//Функция оказалась ненужной.
-/*void Sleep(void) {
- HAL_GPIO_WritePin(LCD_GND_GPIO_Port, LCD_GND_Pin, 0);
- HAL_GPIO_WritePin(stm_check_GPIO_Port, stm_check_Pin, 0);
- HAL_Delay(100);
- GPIO_InitTypeDef GPIO_InitStruct = { 0 };
- Configure GPIO pin : stm_check_Pin
- GPIO_InitStruct.Pin = stm_check_Pin;
- GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
- GPIO_InitStruct.Pull = GPIO_PULLDOWN;
- //GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
- HAL_GPIO_Init(stm_check_GPIO_Port, &GPIO_InitStruct);
-
- Configure GPIO pin : LCD_GND_Pin
- GPIO_InitStruct.Pin = LCD_GND_Pin;
- GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
- GPIO_InitStruct.Pull = GPIO_PULLDOWN;
- //GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
- HAL_GPIO_Init(LCD_GND_GPIO_Port, &GPIO_InitStruct);
- HAL_Delay(100);
- HAL_UART_AbortReceive_IT(&huart2);
- HAL_UART_AbortTransmit_IT(&huart2);
- HAL_Delay(100);
-
- GPIO_InitStruct.Pin = GPIO_PIN_2;
- GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
- GPIO_InitStruct.Pull = GPIO_PULLDOWN;
- HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
- GPIO_InitStruct.Pin = GPIO_PIN_3;
- GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
- GPIO_InitStruct.Pull = GPIO_PULLDOWN;
- HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
- HAL_SuspendTick();
- HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
- CMSIS_Clock_Config();
- HAL_ResumeTick();
-
- MX_GPIO_Init();
- //MX_USART2_UART_Init();
- HAL_Init();
- GPIO_InitStruct.Pin = GPIO_PIN_2;
- GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
- GPIO_InitStruct.Pull = GPIO_NOPULL;
- GPIO_InitStruct.Alternate = GPIO_AF1_USART2;
- GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
- HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
- GPIO_InitStruct.Pin = GPIO_PIN_3;
- GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
- GPIO_InitStruct.Pull = GPIO_NOPULL;
- GPIO_InitStruct.Alternate = GPIO_AF1_USART2;
- GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
- HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
- Sleep_time = HAL_GetTick();
- change_page_time = HAL_GetTick();
- main_page = 0;
- HAL_Delay(100);
- HAL_GPIO_WritePin(LCD_GND_GPIO_Port, LCD_GND_Pin, 1);
- HAL_GPIO_WritePin(stm_check_GPIO_Port, stm_check_Pin, 1);
- HAL_Delay(100);
- if (!LCD_Connect_test()) {
- HAL_Delay(1000);
- NVIC_SystemReset();
- }
- LCD_Init();
- LCD_Clear();
- Load_Clock_seg();
- Load_Con_seg();
- if (HAL_GPIO_ReadPin(esp_check_GPIO_Port, esp_check_Pin) == 1) {
- sprintf(MES, "CONC;");
- //memcpy(DEB, MES, sizeof(DEB));
- HAL_UART_Transmit(&huart2, (uint8_t*) MES, sizeof(MES), 150);
- memset(MES, 0, sizeof(MES));
- }
- HAL_UARTEx_ReceiveToIdle_IT(&huart2, (uint8_t*) GET_COMAND,
- sizeof(GET_COMAND));
- }*/
-
+//backlight on
 void Backlight_change(void) {
 	if (HAL_GetTick() - backl_time > 60000) {
 		sleep = true;
@@ -715,9 +640,10 @@ void Backlight_change(void) {
 		//HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 		backl_time = HAL_GetTick();
 		button_time = HAL_GetTick();
-		HAL_Delay(100);
+		HAL_Delay(200);
 	}
 }
+//enter in menu, when ok/wake button pressing
 void Controls(void) {
 	if (READ_BIT(GPIOA->IDR, GPIO_IDR_ID0) == 0 && sleep == false
 			&& HAL_GetTick() - button_time > 150) {
@@ -732,7 +658,7 @@ void Controls(void) {
 		LCD_Clear();
 	}
 }
-
+//display menu
 void Display_menu(void) {
 	switch (menu_pos) {
 	case 0:
@@ -741,9 +667,9 @@ void Display_menu(void) {
 		LCD_SetCursor(0, 1);
 		LCD_PrintString(" ");
 		LCD_SetCursor(1, 0);
-		LCD_PrintString("Time Settings");
+		LCD_PrintString("Time Settings ");
 		LCD_SetCursor(1, 1);
-		LCD_PrintString("Restart MCU  ");
+		LCD_PrintString("Restart MCU   ");
 		break;
 	case 1:
 		LCD_SetCursor(0, 1);
@@ -751,9 +677,9 @@ void Display_menu(void) {
 		LCD_SetCursor(0, 0);
 		LCD_PrintString(" ");
 		LCD_SetCursor(1, 0);
-		LCD_PrintString("Time Settings");
+		LCD_PrintString("Time Settings ");
 		LCD_SetCursor(1, 1);
-		LCD_PrintString("Restart MCU  ");
+		LCD_PrintString("Restart MCU   ");
 		break;
 	case 2:
 		LCD_SetCursor(0, 1);
@@ -761,9 +687,9 @@ void Display_menu(void) {
 		LCD_SetCursor(0, 0);
 		LCD_PrintString(" ");
 		LCD_SetCursor(1, 0);
-		LCD_PrintString("Restart MCU  ");
+		LCD_PrintString("Restart MCU   ");
 		LCD_SetCursor(1, 1);
-		LCD_PrintString("Factory Reset");
+		LCD_PrintString("Other settings");
 		break;
 	case 3:
 		LCD_SetCursor(0, 1);
@@ -771,9 +697,9 @@ void Display_menu(void) {
 		LCD_SetCursor(0, 0);
 		LCD_PrintString(" ");
 		LCD_SetCursor(1, 0);
-		LCD_PrintString("Factory Reset");
+		LCD_PrintString("Other settings");
 		LCD_SetCursor(1, 1);
-		LCD_PrintString("About        ");
+		LCD_PrintString("About         ");
 		break;
 	case 4:
 		LCD_SetCursor(0, 1);
@@ -781,13 +707,13 @@ void Display_menu(void) {
 		LCD_SetCursor(0, 0);
 		LCD_PrintString(" ");
 		LCD_SetCursor(1, 0);
-		LCD_PrintString("About        ");
+		LCD_PrintString("About         ");
 		LCD_SetCursor(1, 1);
-		LCD_PrintString("Exit menu    ");
+		LCD_PrintString("Exit menu     ");
 		break;
 	}
 }
-
+//controls in menu
 void Menu_Controls(void) {
 	if (READ_BIT(GPIOA->IDR, GPIO_IDR_ID7) == 0 && sleep == false
 			&& HAL_GetTick() - button_time > 100) {
@@ -818,10 +744,10 @@ void Menu_Controls(void) {
 			NVIC_SystemReset();
 			break;
 		case 2:
-			DS3231_SetFullTime(22, 0, 0);
-			DS3231_SetFullDate(25, 3, 2, 2025);
-			DS3231_EnableOscillator(DS3231_ENABLED);
-			NVIC_SystemReset();
+			misc = true;
+			menu_pos = 0;
+			HAL_Delay(50);
+			LCD_Clear();
 			break;
 		case 3:
 			about = true;
@@ -845,7 +771,7 @@ void Menu_Controls(void) {
 	else if (menu_pos < 0)
 		menu_pos = 0;
 }
-
+//display time & date settings
 void Display_Settings(void) {
 	static char TIME1[5], TIME2[5], DATE1[5], DATE2[5], DATE3[9];
 	if (get_time) {
@@ -879,7 +805,7 @@ void Display_Settings(void) {
 	LCD_SetCursor(7, 1);
 	LCD_PrintString(DATE3);
 	LCD_SetCursor(12, 1);
-	switch(Dow){
+	switch (Dow) {
 	case 1:
 		LCD_PrintString(WEK[0]);
 		break;
@@ -897,10 +823,10 @@ void Display_Settings(void) {
 		break;
 	case 6:
 		LCD_PrintString(WEK[5]);
-			break;
+		break;
 	case 7:
 		LCD_PrintString(WEK[6]);
-			break;
+		break;
 	}
 
 	switch (time_pos) {
@@ -1059,7 +985,7 @@ void Display_Settings(void) {
 	}
 //	}
 }
-
+//controls in time & date settings
 void Settings_Controls(void) {
 	if (READ_BIT(GPIOA->IDR, GPIO_IDR_ID7) == 0
 			&& HAL_GetTick() - button_settings_time > 150 && !time_set
@@ -1368,7 +1294,7 @@ void Settings_Controls(void) {
 		}
 	}
 }
-
+//display about
 void Display_About(void) {
 	switch (about_pos) {
 	case 0:
@@ -1412,7 +1338,7 @@ void Display_About(void) {
 	}
 
 }
-
+//controls in about
 void About_controls(void) {
 	if (READ_BIT(GPIOA->IDR, GPIO_IDR_ID7) == 0 && sleep == false
 			&& HAL_GetTick() - button_time > 100) {
@@ -1443,6 +1369,99 @@ void About_controls(void) {
 		about_pos = 5;
 	else if (about_pos < 0)
 		about_pos = 0;
+}
+
+void Display_Misc(void) {
+	switch (misc_pos) {
+	case 0:
+		LCD_SetCursor(1, 0);
+		LCD_PrintString("Wi-Fi  ");
+		if (wifi_on) {
+			LCD_PrintString("ON      ");
+		} else if (!wifi_on) {
+			LCD_PrintString("OFF     ");
+		}
+		LCD_SetCursor(1, 1);
+		LCD_PrintString("Factory Reset");
+		LCD_SetCursor(0, 0);
+		LCD_SendByte(126, 1);
+		LCD_SetCursor(0, 1);
+		LCD_PrintString(" ");
+		break;
+	case 1:
+		LCD_SetCursor(0, 1);
+		LCD_SendByte(126, 1);
+		LCD_SetCursor(0, 0);
+		LCD_PrintString(" ");
+		LCD_SetCursor(1, 0);
+		LCD_PrintString("Wi-Fi  ");
+		if (wifi_on) {
+			LCD_PrintString("ON      ");
+		} else if (!wifi_on) {
+			LCD_PrintString("OFF     ");
+		}
+		LCD_SetCursor(1, 1);
+		LCD_PrintString("Factory Reset");
+		break;
+	case 2:
+		LCD_SetCursor(0, 1);
+		LCD_SendByte(126, 1);
+		LCD_SetCursor(0, 0);
+		LCD_PrintString(" ");
+		LCD_SetCursor(1, 0);
+		LCD_PrintString("Factory Reset");
+		LCD_SetCursor(1, 1);
+		LCD_PrintString("Back         ");
+		break;
+	}
+}
+
+void Misc_controls(void) {
+	if (READ_BIT(GPIOA->IDR, GPIO_IDR_ID7) == 0 && sleep == false
+			&& HAL_GetTick() - button_time > 100) {
+		button_time = HAL_GetTick();
+		close_men_time = HAL_GetTick();
+		misc_pos++;
+
+	}
+	if (READ_BIT(GPIOB->IDR, GPIO_IDR_ID0) == 0 && sleep == false
+			&& HAL_GetTick() - button_time > 100) {
+		button_time = HAL_GetTick();
+		close_men_time = HAL_GetTick();
+		misc_pos--;
+
+	}
+
+	if (READ_BIT(GPIOA->IDR, GPIO_IDR_ID0) == 0 && sleep == false
+			&& HAL_GetTick() - button_time > 100) {
+		button_time = HAL_GetTick();
+		close_men_time = HAL_GetTick();
+		switch (misc_pos) {
+		case 0:
+			wifi_on = !wifi_on;
+			if (wifi_on)
+				GPIOA->BSRR = GPIO_BSRR_BS5;
+			else if (!wifi_on)
+				GPIOA->BSRR = GPIO_BSRR_BR5;
+			break;
+		case 1:
+			DS3231_SetFullTime(22, 0, 0);
+			DS3231_SetFullDate(25, 3, 2, 2025);
+			DS3231_EnableOscillator(DS3231_ENABLED);
+			NVIC_SystemReset();
+			break;
+		case 2:
+			misc = false;
+			misc_pos = 0;
+			HAL_Delay(50);
+			LCD_Clear();
+			break;
+		}
+	}
+	if (misc_pos > 2)
+		misc_pos = 2;
+	else if (misc_pos < 0)
+		misc_pos = 0;
 }
 /* USER CODE END 0 */
 
@@ -1529,7 +1548,7 @@ int main(void) {
 			 LCD_Clear();
 			 clear_flag = false;
 			 }*/
-			if (menu && !time_settings && !about) {
+			if (menu && !time_settings && !about && !misc) {
 				Display_menu();
 				Menu_Controls();
 				if (HAL_GetTick() - close_men_time >= 60000) {
@@ -1542,7 +1561,7 @@ int main(void) {
 					LCD_Clear();
 				}
 			}
-			if (menu && time_settings && !about) {
+			if (menu && time_settings && !about && !misc) {
 				Display_Settings();
 				Settings_Controls();
 				if (HAL_GetTick() - close_men_time >= 60000) {
@@ -1557,13 +1576,24 @@ int main(void) {
 					LCD_Clear();
 				}
 			}
-			if (menu && !time_settings && about) {
+			if (menu && !time_settings && about && !misc) {
 				Display_About();
 				About_controls();
 				if (HAL_GetTick() - close_men_time >= 60000) {
 					close_men_time = HAL_GetTick();
 					about = false;
 					about_pos = 0;
+					HAL_Delay(50);
+					LCD_Clear();
+				}
+			}
+			if (menu && !time_settings && !about && misc) {
+				Display_Misc();
+				Misc_controls();
+				if (HAL_GetTick() - close_men_time >= 60000) {
+					close_men_time = HAL_GetTick();
+					misc = false;
+					misc_pos = 0;
 					HAL_Delay(50);
 					LCD_Clear();
 				}
