@@ -1,5 +1,5 @@
 # Wi-Fi_STMeteo
-  Wi-Fi Метеостанция на базе микроконтроллера STM32G031xx (Cortex-M0+) и ESP8266 (WeMos D1 mini)
+  Wi-Fi Метеостанция на базе микроконтроллера STM32G031xx (Cortex-M0+) и ESP8266 (WeMos D1 mini) + Telegram бот
   
   Версия 1.0
 # Материалы:
